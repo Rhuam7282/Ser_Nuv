@@ -1,9 +1,36 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Consulta CEP - ViaCEP</title>
+    <style>
+        html{
+            background-color: rgb(48, 48, 51);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .container{
+            text-align: center;
+            border-radius: 20px;
+            padding: 10px;
+            background-color: rgb(66, 66, 70);
+            border: solid 1px black;
+            box-shadow: 0px 0px 5px black;
+            width: 400px;
+        }
+        h1{
+            font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+            color: antiquewhite;
+        }
+        p{
+            font-family: 'Arial Narrow', Arial, sans-serif;
+            color: antiquewhite;
+        }
+    </style>
 <body>
     <div class="container">
         <h1>Consulta CEP - ViaCEP</h1>
@@ -14,43 +41,40 @@
 
     <script>
         function buscarCEP() {
-    const cep = document.getElementById('cep').value;
-    const resultadoDiv = document.getElementById('resultado');
+            const cep = document.getElementById('cep').value;
+            const resultadoDiv = document.getElementById('resultado');
+            const url = `https://viacep.com.br/ws/${cep}/json/`;
 
-    // Construir a URL da API ViaCEP
-    const url = `https://viacep.com.br/ws/${cep}/json/`;
-
-    if(url.length != 8){
-        resultadoDiv.innerHTML = `<p style="color: red;">Insira um CEP válido</p>`;
-    }
-
-    // Fazer a requisição usando fetch
-    else {
-        fetch(url)
-        .then(response => {
-            if (!response.ok) {
-                throw new Error(`Erro na requisição: ${response.status}`);
+            if (cep.length != 8) {
+                resultadoDiv.innerHTML = `<p style="color: red;">Insira um CEP válido</p>`;
             }
-            return response.json();
-        })
-        .then(data => {
-            if (data.erro) {
-                resultadoDiv.innerHTML = '<p style="color: red;">CEP não encontrado.</p>';
-            } else {
-                resultadoDiv.innerHTML = `
+            else {
+                fetch(url)
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error(`Erro na requisição: ${response.status}`);
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        if (data.erro) {
+                            resultadoDiv.innerHTML = '<p style="color: red;">CEP não encontrado.</p>';
+                        } else {
+                            resultadoDiv.innerHTML = `
                     <p><strong>CEP:</strong> ${data.cep}</p>
                     <p><strong>Logradouro:</strong> ${data.logradouro}</p>
                     <p><strong>Bairro:</strong> ${data.bairro}</p>
                     <p><strong>Cidade:</strong> ${data.localidade}</p>
                     <p><strong>Estado:</strong> ${data.uf}</p>
                 `;
+                        }
+                    })
+                    .catch(error => {
+                        resultadoDiv.innerHTML = `<p style="color: red;">Erro ao buscar CEP: ${error.message}</p>`;
+                    });
             }
-        })
-        .catch(error => {
-            resultadoDiv.innerHTML = `<p style="color: red;">Erro ao buscar CEP: ${error.message}</p>`;
-        });
-    }
-}
+        }
     </script>
 </body>
+
 </html>
