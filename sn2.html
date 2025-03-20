@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            background: linear-gradient(135deg, #a8dadc, #457b9d);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 15px;
+            padding: 40px;
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37),
+                0 0 20px rgba(255, 255, 255, 0.6);
+            text-align: center;
+            width: 90%;
+            max-width: 400px;
+        }
+
+        h1 {
+            color: #1d3557;
+            margin-bottom: 30px;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+            font-size: 1.8em;
+        }
+
+        input[type="text"] {
+            padding: 12px;
+            border: 2px solid #457b9d;
+            border-radius: 8px;
+            width: 80%;
+            margin-bottom: 20px;
+            font-size: 16px;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1),
+                0 0 10px rgba(255, 255, 255, 0.4);
+        }
+
+        button {
+            padding: 12px 25px;
+            background-color: #1d3557;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2),
+                0 0 15px rgba(255, 255, 255, 0.5);
+        }
+
+        button:hover {
+            background-color: #457b9d;
+        }
+
+        #resultado {
+            margin-top: 30px;
+            text-align: left;
+        }
+
+        #resultado ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        #resultado li {
+            margin-bottom: 10px;
+            padding: 15px;
+            background: rgba(224, 247, 250, 0.7);
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1),
+                0 0 10px rgba(255, 255, 255, 0.3),
+                inset 0 0 5px rgba(255, 255, 255, 0.5);
+        }
+
+        #resultado strong {
+            color: #1d3557;
+        }
+
+        #resultado p {
+            color: red;
+            font-weight: bold;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 20px;
+            }
+
+            h1 {
+                font-size: 1.5em;
+            }
+
+            input[type="text"],
+            button {
+                font-size: 14px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>Consulta CNPJ - Receita WS</h1>
+        <input type="text" id="cnpj" placeholder="Digite o CNPJ (14 dígitos)">
+        <button onclick="buscarcnpj()">Buscar</button>
+        <div id="resultado"></div>
+    </div>
+    <script>
+        function buscarcnpj() {
+            const cnpj = document.getElementById('cnpj').value;
+            const url = 'https://cors-anywhere.herokuapp.com/https://receitaws.com.br/v1/cnpj/' + cnpj;
+            const options = { method: 'GET', headers: { Accept: 'application/json' } };
+            const resultadoDiv = document.getElementById('resultado');
+                fetch(url, options)
+                    .then(response => {
+                        if (!response.ok) {
+
+                            if (response.status == "429") {
+                                resultadoDiv.innerHTML =
+                                    `<p style="color: red;">Muitas requisições, aguarde 1 minuto e tente novamente</p>`
+                                    ;
+                            } else if (response.status == "400" || response.status == "404") {
+                                resultadoDiv.innerHTML =
+                                    `<p style="color: red;">CNPJ não encontrado, verifique se o número inserido está correto</p>`
+                                    ;
+                            } else {
+                                resultadoDiv.innerHTML =
+                                    `<p style="color: red;">Falha na comunicação com o servidor, aguarde 1 minuto e tente novamente</p>`
+                                    ;
+                            }
+
+                            throw new Error('Erro na requisição:' + response.status);
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        if (data) {
+                            resultadoDiv.innerHTML = `
+                        <ul>
+                    <li><strong>cnpj:</strong> ${data.cnpj}</li>
+                    <li><strong>status:</strong> ${data.status}</li>
+                    <li><strong>nome:</strong> ${data.situacao}</li>
+                    <li><strong>Cidade:</strong> ${data.municipio}</li>
+                    <li><strong>Estado:</strong> ${data.uf}</li>
+                    </ul>
+                `;
+                        }
+                    })
+        }
+    </script>
+</body>
+
+</html>
